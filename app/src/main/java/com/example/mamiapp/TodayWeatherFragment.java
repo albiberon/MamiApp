@@ -13,6 +13,13 @@ import android.view.ViewGroup;
  */
 public class TodayWeatherFragment extends Fragment {
 
+    static TodayWeatherFragment instance;
+
+    public static TodayWeatherFragment getInstance(){
+        if (instance == null) instance = new TodayWeatherFragment();
+
+        return instance;
+    }
 
     public TodayWeatherFragment() {
         // Required empty public constructor

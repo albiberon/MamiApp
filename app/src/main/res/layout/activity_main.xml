@@ -52,14 +52,15 @@
     <TextView
         android:id="@+id/textView2"
         android:layout_width="0dp"
-        android:layout_height="45dp"
+        android:layout_height="50dp"
         android:background="@color/white"
+        android:elevation="20dp"
         android:fontFamily="@font/gill_sans_regular"
-        android:paddingTop="10dp"
+        android:paddingTop="18dp"
         android:text="Swipe up to view the products"
         android:textAlignment="center"
         android:textColor="#ea4c7d"
-        android:textSize="18sp"
+        android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
