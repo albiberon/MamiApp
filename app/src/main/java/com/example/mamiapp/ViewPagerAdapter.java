@@ -1,18 +1,26 @@
 package com.example.mamiapp;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
     //integer to count number of tabs
     int tabCount;
 
+    //Adapter2ingegration
+    private final List<Fragment> fragmentList = new ArrayList<>();
+    private final List<String> fragmentTitle = new ArrayList<>();
+
     //Constructor to the class
     public ViewPagerAdapter(FragmentManager fm, int tabCount) {
         super(fm);
-//Initializing tab count
-        this.tabCount= tabCount;
+        //Initializing tab count
+        this.tabCount = tabCount;
     }
 
     //Overriding method getItem
