@@ -3,9 +3,12 @@ package com.example.mamiapp;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
@@ -53,13 +56,17 @@ public class Tab1 extends Fragment {
     private TextView weatherDescription;
     private ProgressBar loading;
     private ConstraintLayout weatherDataContainer;
-    private TextView mTvLocation;
+    public String locationName;
+    private FragmentAListener listener;
+
     //to be back
     //private MainActivityViewModel viewModel;
     //
 
     CompositeDisposable compositeDisposable;
     IOpenWeatherMap mService;
+
+
 
 
     static Tab1 instance;
@@ -73,10 +80,13 @@ public class Tab1 extends Fragment {
         return instance;
     }
 
+
+
     public Tab1(){
         compositeDisposable = new CompositeDisposable();
         Retrofit retrofit = new RetrofitClient().getInstance();
         mService = retrofit.create(IOpenWeatherMap.class);
+
 
     }
 
@@ -87,7 +97,6 @@ public class Tab1 extends Fragment {
             List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
             Address obj = addresses.get(0);
             String add = obj.getAddressLine(0);
-            mTvLocation.setText(obj.getAdminArea());
             //Log.v("IGA", "Address" + add);
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,12 +116,24 @@ public class Tab1 extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         EventBus.getDefault().register(this);
+        if (context instanceof FragmentAListener) {
+            listener = (FragmentAListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + "must implement fragment");
+        }
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         EventBus.getDefault().unregister(this);
+        listener = null;
+    }
+
+
+    public interface FragmentAListener {
+        void onInputASent(String input);
     }
 
 
@@ -127,12 +148,12 @@ public class Tab1 extends Fragment {
        temperature = (TextView)itemView.findViewById(R.id.temperature);
        weatherHeader = (TextView)itemView.findViewById(R.id.weatherHeader);
        weatherDescription = (TextView)itemView.findViewById(R.id.WeatherDetails);
-       mTvLocation = (TextView)itemView.findViewById(R.id.tv_location_name);
+
 
        loading = (ProgressBar)itemView.findViewById(R.id.loading);
 
 
-//        getWeatherInformation();
+
 
 
         // to be back
@@ -166,7 +187,10 @@ public class Tab1 extends Fragment {
 
 
 
+
         return itemView;
+
+
 
     }
 
@@ -195,6 +219,15 @@ public class Tab1 extends Fragment {
                                 //Display panel
                                 weatherDataContainer.setVisibility(View.VISIBLE);
                                 loading.setVisibility(View.GONE);
+
+                                locationName = weatherResult.getName();
+                                Log.v("LOCATIONNAME", locationName);
+                                listener.onInputASent(locationName);
+
+                                weatherHeader.setText(new StringBuilder(weatherResult.getWeather().get(0).getMain()));
+                                weatherDescription.setText(new StringBuilder(weatherResult.getWeather().get(0).getDescription()));
+
+
                             }
                         }, new Consumer<Throwable>() {
                             @Override
@@ -204,6 +237,10 @@ public class Tab1 extends Fragment {
                         })
         );
     }
+
+
+
+    //putFloat("total", value).apply();
 
 
 //    private void getWeatherInformation() {
@@ -239,7 +276,6 @@ public class Tab1 extends Fragment {
 //                })
 //        );
 //    }
-
 
 }
 

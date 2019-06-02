@@ -70,15 +70,15 @@ public class GeoObject {
 
 
     public static final double[] PRE_DEFINED_PRICES = {
-            9.95,
-            9.95,
-            9.95,
-            9.95,
-            9.95,
-            9.95,
-            9.95,
-            9.95,
-            9.95
+            2.55,
+            4.95,
+            12.15,
+            5.95,
+            10.00,
+            36.25,
+            2.25,
+            6.69,
+            1.25
     };
 
 
