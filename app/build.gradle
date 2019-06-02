@@ -57,8 +57,17 @@ dependencies {
     // GSON body parser
     implementation 'com.google.code.gson:gson:2.8.2'
 
+    //EvenBus
+    implementation 'org.greenrobot:eventbus:3.1.1'
 
 
+//RoomDatabase
+    implementation "android.arch.persistence.room:runtime:1.1.1"
+    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
 
+// Lifecycle components
+    implementation 'android.arch.lifecycle:runtime:1.1.1'
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 }
 

@@ -11,9 +11,9 @@ public class Common {
     public static Location current_location = null;
 
 
-    public static String convertUnixToDate(long dt){
+    public static String convertUnixToDate(long dt) {
 
-        Date date = new Date(dt*1000L);
+        Date date = new Date(dt * 1000L);
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm EEE MM yyyy");
         String formattedDate = formatter.format(date);
 
@@ -21,5 +21,6 @@ public class Common {
 
     }
 
-
 }
+
+

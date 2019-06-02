@@ -3,6 +3,7 @@ package com.example.mamiapp;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
@@ -12,14 +13,22 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mamiapp.Common.Common;
+import com.example.mamiapp.Retrofit.IOpenWeatherMap;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+
+import org.greenrobot.eventbus.EventBus;
+
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -28,16 +37,31 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.List;
 
+import io.reactivex.disposables.CompositeDisposable;
+
+//import com.example.mamiapp.Common.Common;
+
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
     private float x1, x2, y1, y2;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
-    //private TextView cityName;
-    //private TextView temperature;
 
-    private Tab1 tab1;
+
+    // I will need this to populate city name in correct place
+    CompositeDisposable compositeDisposable;
+    IOpenWeatherMap mService;
+
+    private TextView cityName;
+
+    private ImageView mamiImage;
+    private ImageView backgroundImage;
+
+    public static Location mLocation;
+
+
+
 
     //location related
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -50,10 +74,32 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //method for initialisation
-       // cityName = findViewById(R.id.locationName);
-        //temperature = findViewById(R.id.temperature);
+       mamiImage = (ImageView)findViewById(R.id.mamiImage);
+       backgroundImage = (ImageView)findViewById(R.id.backgroundImage);
 
+       mamiImage.setImageDrawable(getDrawable(R.drawable.mami_talking));
+       backgroundImage.setImageDrawable(getDrawable(R.drawable.rain));
+
+
+        //mami animation
+        Animation mamiAnimation = new TranslateAnimation(Animation.ABSOLUTE,0,Animation.ABSOLUTE,-730);
+        mamiAnimation.setDuration(500);
+        mamiAnimation.setFillAfter(true);
+       mamiImage.startAnimation(mamiAnimation);
+
+
+        //background animation
+
+        Animation backgroundAnimation = new AlphaAnimation(0f, 1.0f);
+        backgroundAnimation.setDuration(800);
+        backgroundAnimation.setFillAfter(true);
+        backgroundImage.startAnimation(backgroundAnimation);
+
+
+        viewPager = findViewById(R.id.pager);
+        //method for initialisation
+        cityName = findViewById(R.id.locationName);
+        //temperature = findViewById(R.id.temperature);
 
         //request permission
         Dexter.withActivity(this)
@@ -66,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
                                           buildLocationRequest();
                                           buildLocationCallBack();
-
 
 
                                           if (ActivityCompat.checkSelfPermission
@@ -90,11 +135,23 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
 
                 ).check();
+
         init();
+
+
     }
 
-    private void buildLocationCallBack() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mLocation != null) {
+            //Greenrobots EventBus provides simplified communication between Activities, Fragments, Threads, Services, etc. with less code, better
+            EventBus.getDefault().post(new DataSyncEvent("Active"));
+        }
+    }
 
+
+    private void buildLocationCallBack() {
 
 
         locationCallback = new LocationCallback() {
@@ -103,13 +160,18 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
 
-                Common.current_location = locationResult.getLastLocation();
+//                Common.current_location = locationResult.getLastLocation();
 
-                    viewPager = findViewById(R.id.pager);
-                    setupViewPager2(viewPager);
+                mLocation = locationResult.getLastLocation();
+                if (mLocation != null) {
+
+                    EventBus.getDefault().post(new DataSyncEvent("Active"));
 
 
-                Log.d("Location", locationResult.getLastLocation().getLatitude() + "/" + locationResult.getLastLocation().getLongitude());
+                }
+
+
+                //Log.d("Location", locationResult.getLastLocation().getLatitude() + "/" + locationResult.getLastLocation().getLongitude());
             }
 
         };
@@ -117,12 +179,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     }
 
 
-    private void setupViewPager2(ViewPager viewPager) {
-        ViewPagerAdapter2 adapter2 = new ViewPagerAdapter2(getSupportFragmentManager());
-        adapter2.addFragment(Tab1.getInstance(), "Today");
-        viewPager.setAdapter(adapter2);
 
-    }
 
     private void buildLocationRequest() {
         locationRequest = new LocationRequest();
@@ -194,6 +251,9 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     public void onTabReselected(TabLayout.Tab tab) {
 
     }
+
+
+
 
 
 }
