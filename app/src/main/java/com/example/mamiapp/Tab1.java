@@ -2,6 +2,9 @@ package com.example.mamiapp;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -18,10 +21,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mamiapp.Common.Common;
+import com.example.mamiapp.Model.WeatherResult;
+import com.example.mamiapp.Retrofit.IOpenWeatherMap;
+import com.example.mamiapp.Retrofit.RetrofitClient;
+import com.squareup.picasso.Picasso;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.w3c.dom.Text;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -39,11 +53,13 @@ public class Tab1 extends Fragment {
     private TextView weatherDescription;
     private ProgressBar loading;
     private ConstraintLayout weatherDataContainer;
+    private TextView mTvLocation;
     //to be back
     //private MainActivityViewModel viewModel;
     //
 
     CompositeDisposable compositeDisposable;
+    IOpenWeatherMap mService;
 
 
     static Tab1 instance;
@@ -57,6 +73,47 @@ public class Tab1 extends Fragment {
         return instance;
     }
 
+    public Tab1(){
+        compositeDisposable = new CompositeDisposable();
+        Retrofit retrofit = new RetrofitClient().getInstance();
+        mService = retrofit.create(IOpenWeatherMap.class);
+
+    }
+
+
+    public void getAddress(double lat, double lng) {
+        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+            Address obj = addresses.get(0);
+            String add = obj.getAddressLine(0);
+            mTvLocation.setText(obj.getAdminArea());
+            //Log.v("IGA", "Address" + add);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Subscribe
+    public void onEvent(DataSyncEvent syncStatusMessage) {
+        if(syncStatusMessage.getSyncStatusMessage().equals("Active")){
+
+            getAddress(MainActivity.mLocation.getLatitude(),MainActivity.mLocation.getLongitude());
+            getWeatherInformation();
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        EventBus.getDefault().unregister(this);
+    }
 
 
     //Overriden method onCreateView
@@ -70,10 +127,10 @@ public class Tab1 extends Fragment {
        temperature = (TextView)itemView.findViewById(R.id.temperature);
        weatherHeader = (TextView)itemView.findViewById(R.id.weatherHeader);
        weatherDescription = (TextView)itemView.findViewById(R.id.WeatherDetails);
+       mTvLocation = (TextView)itemView.findViewById(R.id.tv_location_name);
 
+       loading = (ProgressBar)itemView.findViewById(R.id.loading);
 
-
-//       loading = (ProgressBar)itemView.findViewById(R.id.loading);
 
 //        getWeatherInformation();
 
@@ -112,6 +169,42 @@ public class Tab1 extends Fragment {
         return itemView;
 
     }
+
+    public void getWeatherInformation() {
+        compositeDisposable.add(mService
+                        .getWeatherByLatLng(String.valueOf(MainActivity.mLocation.getLatitude())
+                                ,String.valueOf(MainActivity.mLocation.getLongitude())
+                                , Common.APP_ID, "metric")
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Consumer<WeatherResult>() {
+                            @Override
+                            public void accept(WeatherResult weatherResult) throws Exception {
+
+                                //Load image
+                                Picasso.get().load(new StringBuilder("https://openweathermap.org/img/w/")
+                                        .append(weatherResult.getWeather().get(0).getIcon())
+                                        .append(".png").toString()).into(image_weather);
+
+                                // Loading information
+                                temperature.setText(new StringBuilder(String.valueOf(Math.round(weatherResult.getMain().getTemp())))
+//                        temperature.setText(new StringBuilder(String.valueOf(weatherResult.getMain().getTemp()))
+                                        .append("°c").toString());
+                                date.setText(Common.convertUnixToDate(weatherResult.getDt()));
+
+                                //Display panel
+                                weatherDataContainer.setVisibility(View.VISIBLE);
+                                loading.setVisibility(View.GONE);
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) throws Exception {
+                                Toast.makeText(getActivity(), ""+throwable.getMessage() , Toast.LENGTH_SHORT);
+                            }
+                        })
+        );
+    }
+
 
 //    private void getWeatherInformation() {
 //        compositeDisposable.add(mService

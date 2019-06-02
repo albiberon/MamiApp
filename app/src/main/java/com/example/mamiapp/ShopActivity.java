@@ -31,6 +31,7 @@ public class ShopActivity extends AppCompatActivity {
     private GeoObjectAdapter mAdapter;
     private Executor executor = Executors.newSingleThreadExecutor();
 
+    //will be necessary for product details.
     public static final String EXTRA_PRODUCT = "Product";
     public static final int REQUESTCODE = 1234;
 
@@ -43,10 +44,6 @@ public class ShopActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         db = ProductRoomDatabase.getDatabase(this);
 
-
-//        for (int i = 0; i < GeoObject.PRE_DEFINED_GEO_OBJECT_NAMES.length; i++) {
-//            products.add(new Product(.PRE_DEFINED_GEO_OBJECT_NAMES[i], GeoObject.PRE_DEFINED_GEO_OBJECT_IMAGE_IDS[i], GeoObject.PRE_DEFINED_PRICES[i]));
-//        }
 
         mRecyclerView = findViewById(R.id.recyclerView);
 
@@ -61,11 +58,7 @@ public class ShopActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
 
 
-        //db.productDao().insertProduct();
-
-//        mGeoRecyclerView.addOnItemTouchListener((RecyclerView.OnItemTouchListener) this);
-
-        getAllProducts();
+        //getAllProducts();
 
 
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -81,38 +74,38 @@ public class ShopActivity extends AppCompatActivity {
 
     }
 
-    private void updateUI() {
-        if (mAdapter == null) {
-            mAdapter = new GeoObjectAdapter(this.products);
-            mRecyclerView.setAdapter(mAdapter);
-        } else {
-            mAdapter.swapList(products);
-        }
-    }
+//    private void updateUI() {
+//        if (mAdapter == null) {
+//            mAdapter = new GeoObjectAdapter(this.products);
+//            mRecyclerView.setAdapter(mAdapter);
+//        } else {
+//            mAdapter.swapList(products);
+//        }
+//    }
 
 
-    private void getAllProducts() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                products = db.productDao().getAllProducts();
+//    private void getAllProducts() {
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                products = db.productDao().getAllProducts();
+//
+//                // In a background thread the user interface cannot be updated from this thread.
+//                // This method will perform statements on the main thread again.
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        updateUI();
+//                    }
+//                });
+//            }
+//        });
+//    }
 
-                // In a background thread the user interface cannot be updated from this thread.
-                // This method will perform statements on the main thread again.
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateUI();
-                    }
-                });
-            }
-        });
-    }
-
-    private void populateDB(){
-        Product product1 = new Product("Product1",9.90, R.drawable.bergstein_regenlaarzen_donkergroen_donkergroen_8718191084441, "Loremipsum");
-                db.productDao().insertProduct(product1);
-    }
+//    private void populateDB(){
+//        Product product1 = new Product("Product1",9.90, R.drawable.bergstein_regenlaarzen_donkergroen_donkergroen_8718191084441, "Loremipsum");
+//                db.productDao().insertProduct(product1);
+//    }
 
 //    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
 //        View child = rv.findChildViewUnder(e.getX(), e.getY());

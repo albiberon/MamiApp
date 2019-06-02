@@ -26,6 +26,9 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+
+import org.greenrobot.eventbus.EventBus;
+
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -69,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
        mamiImage = (ImageView)findViewById(R.id.mamiImage);
        backgroundImage = (ImageView)findViewById(R.id.backgroundImage);
@@ -134,7 +138,18 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
         init();
 
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mLocation != null) {
+            //Greenrobots EventBus provides simplified communication between Activities, Fragments, Threads, Services, etc. with less code, better
+            EventBus.getDefault().post(new DataSyncEvent("Active"));
+        }
+    }
+
 
     private void buildLocationCallBack() {
 
@@ -145,14 +160,18 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
 
+//                Common.current_location = locationResult.getLastLocation();
 
-                Common.current_location = locationResult.getLastLocation();
+                mLocation = locationResult.getLastLocation();
+                if (mLocation != null) {
 
-                viewPager = findViewById(R.id.pager);
-                //                   setupViewPager2(viewPager);
+                    EventBus.getDefault().post(new DataSyncEvent("Active"));
 
-                //checking if the location tracking is working.
-                Log.d("Location_Now", locationResult.getLastLocation().getLatitude() + "/" + locationResult.getLastLocation().getLongitude());
+
+                }
+
+
+                //Log.d("Location", locationResult.getLastLocation().getLatitude() + "/" + locationResult.getLastLocation().getLongitude());
             }
 
         };
@@ -160,12 +179,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     }
 
 
-//    private void setupViewPager2(ViewPager viewPager) {
-//        ViewPagerAdapter2 adapter2 = new ViewPagerAdapter2(getSupportFragmentManager());
-//        adapter2.addFragment(Tab1.getInstance(), "Today");
-//        viewPager.setAdapter(adapter2);
-//
-//    }
+
 
     private void buildLocationRequest() {
         locationRequest = new LocationRequest();
@@ -237,6 +251,9 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     public void onTabReselected(TabLayout.Tab tab) {
 
     }
+
+
+
 
 
 }
