@@ -3,6 +3,7 @@ package com.example.mamiapp;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
@@ -16,8 +17,10 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.mamiapp.Common.Common;
+import com.example.mamiapp.Retrofit.IOpenWeatherMap;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -31,6 +34,8 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.List;
 
+import io.reactivex.disposables.CompositeDisposable;
+
 //import com.example.mamiapp.Common.Common;
 
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
@@ -39,11 +44,21 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
+
+
+    // I will need this to populate city name in correct place
+    CompositeDisposable compositeDisposable;
+    IOpenWeatherMap mService;
+
+    private TextView cityName;
+
     private ImageView mamiImage;
     private ImageView backgroundImage;
 
+    public static Location mLocation;
 
-   private MainActivityViewModel viewModel;
+
+
 
     //location related
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -55,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mamiImage = (ImageView)findViewById(R.id.mamiImage);
+       mamiImage = (ImageView)findViewById(R.id.mamiImage);
        backgroundImage = (ImageView)findViewById(R.id.backgroundImage);
 
        mamiImage.setImageDrawable(getDrawable(R.drawable.mami_talking));
@@ -77,10 +92,10 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         backgroundImage.startAnimation(backgroundAnimation);
 
 
+        viewPager = findViewById(R.id.pager);
         //method for initialisation
-        // cityName = findViewById(R.id.locationName);
+        cityName = findViewById(R.id.locationName);
         //temperature = findViewById(R.id.temperature);
-
 
         //request permission
         Dexter.withActivity(this)
@@ -116,8 +131,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
 
                 ).check();
-
-
 
         init();
 
