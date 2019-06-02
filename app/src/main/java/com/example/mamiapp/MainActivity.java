@@ -12,6 +12,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import com.example.mamiapp.Common.Common;
@@ -37,7 +40,10 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
     private ImageView mamiImage;
-    //private MainActivityViewModel viewModel;
+    private ImageView backgroundImage;
+
+
+   private MainActivityViewModel viewModel;
 
     //location related
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -48,10 +54,28 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        mamiImage = (ImageView)findViewById(R.id.mami_Image);
-        mamiImage.setImageResource(R.drawable.mami_talking);
+        mamiImage = (ImageView)findViewById(R.id.mamiImage);
+       backgroundImage = (ImageView)findViewById(R.id.backgroundImage);
+
+       mamiImage.setImageDrawable(getDrawable(R.drawable.mami_talking));
+       backgroundImage.setImageDrawable(getDrawable(R.drawable.rain));
+
+
+        //mami animation
+        Animation mamiAnimation = new TranslateAnimation(Animation.ABSOLUTE,0,Animation.ABSOLUTE,-730);
+        mamiAnimation.setDuration(500);
+        mamiAnimation.setFillAfter(true);
+       mamiImage.startAnimation(mamiAnimation);
+
+
+        //background animation
+
+        Animation backgroundAnimation = new AlphaAnimation(0f, 1.0f);
+        backgroundAnimation.setDuration(800);
+        backgroundAnimation.setFillAfter(true);
+        backgroundImage.startAnimation(backgroundAnimation);
+
 
         //method for initialisation
         // cityName = findViewById(R.id.locationName);

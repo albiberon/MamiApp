@@ -11,39 +11,61 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.mamiapp.Database.ProductRoomDatabase;
+import com.example.mamiapp.Model.Product;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class ShopActivity extends AppCompatActivity {
 
     private float x1, x2, y1, y2;
 
 
-    List<GeoObject> mGeoObjects;
+    private List<Product> products;
     private GestureDetector mGestureDetector;
+    private ProductRoomDatabase db;
+    private RecyclerView mRecyclerView;
+    private GeoObjectAdapter mAdapter;
+    private Executor executor = Executors.newSingleThreadExecutor();
+
+    public static final String EXTRA_PRODUCT = "Product";
+    public static final int REQUESTCODE = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shop);
 
-        mGeoObjects = new ArrayList<>();
+
+        setContentView(R.layout.activity_main);
+        db = ProductRoomDatabase.getDatabase(this);
 
 
-        for (int i = 0; i < GeoObject.PRE_DEFINED_GEO_OBJECT_NAMES.length; i++) {
-            mGeoObjects.add(new GeoObject(GeoObject.PRE_DEFINED_GEO_OBJECT_NAMES[i], GeoObject.PRE_DEFINED_GEO_OBJECT_IMAGE_IDS[i], GeoObject.PRE_DEFINED_PRICES[i]));
-        }
+//        for (int i = 0; i < GeoObject.PRE_DEFINED_GEO_OBJECT_NAMES.length; i++) {
+//            products.add(new Product(.PRE_DEFINED_GEO_OBJECT_NAMES[i], GeoObject.PRE_DEFINED_GEO_OBJECT_IMAGE_IDS[i], GeoObject.PRE_DEFINED_PRICES[i]));
+//        }
 
-        final RecyclerView mGeoRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView = findViewById(R.id.recyclerView);
 
         RecyclerView.LayoutManager mLayoutManager = new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
 
-        mGeoRecyclerView.setLayoutManager(mLayoutManager);
-        mGeoRecyclerView.setHasFixedSize(true);
-        GeoObjectAdapter mAdapter = new GeoObjectAdapter(this, mGeoObjects);
-        mGeoRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        products = new ArrayList<>();
+
+
+        GeoObjectAdapter mAdapter = new GeoObjectAdapter(products);
+        mRecyclerView.setAdapter(mAdapter);
+
+
+        //db.productDao().insertProduct();
 
 //        mGeoRecyclerView.addOnItemTouchListener((RecyclerView.OnItemTouchListener) this);
+
+        getAllProducts();
 
 
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -56,6 +78,40 @@ public class ShopActivity extends AppCompatActivity {
         });
 
 
+
+    }
+
+    private void updateUI() {
+        if (mAdapter == null) {
+            mAdapter = new GeoObjectAdapter(this.products);
+            mRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.swapList(products);
+        }
+    }
+
+
+    private void getAllProducts() {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                products = db.productDao().getAllProducts();
+
+                // In a background thread the user interface cannot be updated from this thread.
+                // This method will perform statements on the main thread again.
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateUI();
+                    }
+                });
+            }
+        });
+    }
+
+    private void populateDB(){
+        Product product1 = new Product("Product1",9.90, R.drawable.bergstein_regenlaarzen_donkergroen_donkergroen_8718191084441, "Loremipsum");
+                db.productDao().insertProduct(product1);
     }
 
 //    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
@@ -91,8 +147,26 @@ public class ShopActivity extends AppCompatActivity {
 
 
     public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
     }
 
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if (requestCode == REQUESTCODE) {
+//            if (resultCode == RESULT_OK) {
+//                Product updatedReminder = data.getParcelableExtra(MainActivity.EXTRA);
+//                // New timestamp: timestamp of update
+//                updateProduct(updatedProduct);
+//            }
+//        }
+//    }
 
+
+
+
+
+    
 
 }
+
+

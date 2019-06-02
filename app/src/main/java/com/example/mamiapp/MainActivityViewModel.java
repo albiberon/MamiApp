@@ -5,8 +5,6 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
-import com.example.mamiapp.Retrofit.WeatherRepository;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

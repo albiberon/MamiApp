@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -48,17 +50,13 @@ public class Tab1 extends Fragment {
 
     public static Tab1 getInstance(){
         if (instance == null) instance = new Tab1();
+        // compositeDisposable = new CompositeDisposable();
+        // Retrofit retrofit = new RetrofitClient().getInstance();
+        // mService = retrofit.create(IOpenWeatherMap.class);
 
         return instance;
     }
 
-
-//    public Tab1(){
-//        compositeDisposable = new CompositeDisposable();
-//        Retrofit retrofit = new RetrofitClient().getInstance();
-//        mService = retrofit.create(IOpenWeatherMap.class);
-//
-//    }
 
 
     //Overriden method onCreateView
@@ -72,6 +70,8 @@ public class Tab1 extends Fragment {
        temperature = (TextView)itemView.findViewById(R.id.temperature);
        weatherHeader = (TextView)itemView.findViewById(R.id.weatherHeader);
        weatherDescription = (TextView)itemView.findViewById(R.id.WeatherDetails);
+
+
 
 //       loading = (ProgressBar)itemView.findViewById(R.id.loading);
 
