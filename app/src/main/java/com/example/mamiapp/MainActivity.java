@@ -54,7 +54,7 @@ import retrofit2.Retrofit;
 
 //import com.example.mamiapp.Common.Common;
 
-public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
+public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener, Tab1.FragmentAListener {
 
     private float x1, x2, y1, y2;
     private TabLayout tabLayout;
@@ -85,12 +85,16 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private LocationRequest locationRequest;
 
 
+    private Tab1 tab1;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
+        tab1 = new Tab1();
 
         cityName = (TextView) findViewById(R.id.locationName);
 
@@ -118,9 +122,10 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
         viewPager = findViewById(R.id.pager);
 
-        cityName = findViewById(R.id.locationName);
 
 
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.pager, tab1).commit();
 
 
         //request permission
@@ -199,6 +204,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
 
     }
+
+
 
 
 
@@ -312,8 +319,9 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
     }
 
-    public String getCityName() {
-        return cityNameFromFragment;
-    }
 
+    @Override
+    public void onInputASent(String input) {
+        cityName.setText(input);
+    }
 }

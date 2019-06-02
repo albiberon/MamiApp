@@ -56,8 +56,8 @@ public class Tab1 extends Fragment {
     private TextView weatherDescription;
     private ProgressBar loading;
     private ConstraintLayout weatherDataContainer;
-    private TextView mTvLocation;
     public String locationName;
+    private FragmentAListener listener;
 
     //to be back
     //private MainActivityViewModel viewModel;
@@ -97,7 +97,6 @@ public class Tab1 extends Fragment {
             List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
             Address obj = addresses.get(0);
             String add = obj.getAddressLine(0);
-            mTvLocation.setText(obj.getAdminArea());
             //Log.v("IGA", "Address" + add);
         } catch (IOException e) {
             e.printStackTrace();
@@ -117,6 +116,11 @@ public class Tab1 extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         EventBus.getDefault().register(this);
+        if (context instanceof FragmentAListener) {
+            listener = (FragmentAListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + "must implement fragment");
+        }
 
     }
 
@@ -124,6 +128,12 @@ public class Tab1 extends Fragment {
     public void onDetach() {
         super.onDetach();
         EventBus.getDefault().unregister(this);
+        listener = null;
+    }
+
+
+    public interface FragmentAListener {
+        void onInputASent(String input);
     }
 
 
@@ -138,7 +148,7 @@ public class Tab1 extends Fragment {
        temperature = (TextView)itemView.findViewById(R.id.temperature);
        weatherHeader = (TextView)itemView.findViewById(R.id.weatherHeader);
        weatherDescription = (TextView)itemView.findViewById(R.id.WeatherDetails);
-       mTvLocation = (TextView)itemView.findViewById(R.id.tv_location_name);
+
 
        loading = (ProgressBar)itemView.findViewById(R.id.loading);
 
@@ -177,7 +187,10 @@ public class Tab1 extends Fragment {
 
 
 
+
         return itemView;
+
+
 
     }
 
@@ -208,11 +221,11 @@ public class Tab1 extends Fragment {
                                 loading.setVisibility(View.GONE);
 
                                 locationName = weatherResult.getName();
+                                Log.v("LOCATIONNAME", locationName);
+                                listener.onInputASent(locationName);
 
                                 weatherHeader.setText(new StringBuilder(weatherResult.getWeather().get(0).getMain()));
                                 weatherDescription.setText(new StringBuilder(weatherResult.getWeather().get(0).getDescription()));
-
-                                //passing locationName into MainActivity
 
 
                             }
