@@ -1,6 +1,7 @@
 package com.example.mamiapp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -14,34 +15,42 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mamiapp.Common.Common;
 import com.example.mamiapp.Database.DBClient;
 import com.example.mamiapp.Database.ProductTable;
+import com.example.mamiapp.Model.WeatherResult;
 import com.example.mamiapp.Retrofit.IOpenWeatherMap;
+import com.example.mamiapp.Retrofit.RetrofitClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-
-import org.greenrobot.eventbus.EventBus;
-
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.squareup.picasso.Picasso;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
 
 //import com.example.mamiapp.Common.Common;
 
@@ -51,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
+
 
 
     private List<ProductTable> productList = new ArrayList<>();
@@ -66,8 +76,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private ImageView backgroundImage;
 
     public static Location mLocation;
-
-
+    private String cityNameFromFragment;
 
 
     //location related
@@ -81,18 +90,22 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       mamiImage = (ImageView)findViewById(R.id.mamiImage);
-       backgroundImage = (ImageView)findViewById(R.id.backgroundImage);
 
-       mamiImage.setImageDrawable(getDrawable(R.drawable.mami_talking));
-       backgroundImage.setImageDrawable(getDrawable(R.drawable.rain));
+
+        cityName = (TextView) findViewById(R.id.locationName);
+
+        mamiImage = (ImageView) findViewById(R.id.mamiImage);
+        backgroundImage = (ImageView) findViewById(R.id.backgroundImage);
+
+        mamiImage.setImageDrawable(getDrawable(R.drawable.mami_talking));
+        backgroundImage.setImageDrawable(getDrawable(R.drawable.rain));
 
 
         //mami animation
-        Animation mamiAnimation = new TranslateAnimation(Animation.ABSOLUTE,0,Animation.ABSOLUTE,-730);
+        Animation mamiAnimation = new TranslateAnimation(Animation.ABSOLUTE, 0, Animation.ABSOLUTE, -730);
         mamiAnimation.setDuration(500);
         mamiAnimation.setFillAfter(true);
-       mamiImage.startAnimation(mamiAnimation);
+        mamiImage.startAnimation(mamiAnimation);
 
 
         //background animation
@@ -104,9 +117,11 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
 
         viewPager = findViewById(R.id.pager);
-        //method for initialisation
+
         cityName = findViewById(R.id.locationName);
-        //temperature = findViewById(R.id.temperature);
+
+
+
 
         //request permission
         Dexter.withActivity(this)
@@ -145,13 +160,23 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
         init();
 
+//        if(tab1.locationName != null) {
+//            cityName.setText(tab1.locationName);
+//        }
+
+
+
+
+
+
+
         //DB population at start
 
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
 
-                if( DBClient
+                if (DBClient
                         .getInstance(getApplicationContext())
                         .getAppDatabase()
                         .productDao()
@@ -173,8 +198,10 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         }.execute();
 
 
-
     }
+
+
+
 
     @Override
     protected void onResume() {
@@ -212,8 +239,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         };
 
     }
-
-
 
 
     private void buildLocationRequest() {
@@ -287,8 +312,8 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
     }
 
-
-
-
+    public String getCityName() {
+        return cityNameFromFragment;
+    }
 
 }

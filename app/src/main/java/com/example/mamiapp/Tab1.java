@@ -3,9 +3,12 @@ package com.example.mamiapp;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
@@ -54,6 +57,7 @@ public class Tab1 extends Fragment {
     private ProgressBar loading;
     private ConstraintLayout weatherDataContainer;
     private TextView mTvLocation;
+    public String locationName;
 
     //to be back
     //private MainActivityViewModel viewModel;
@@ -61,6 +65,8 @@ public class Tab1 extends Fragment {
 
     CompositeDisposable compositeDisposable;
     IOpenWeatherMap mService;
+
+
 
 
     static Tab1 instance;
@@ -80,6 +86,7 @@ public class Tab1 extends Fragment {
         compositeDisposable = new CompositeDisposable();
         Retrofit retrofit = new RetrofitClient().getInstance();
         mService = retrofit.create(IOpenWeatherMap.class);
+
 
     }
 
@@ -110,6 +117,7 @@ public class Tab1 extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         EventBus.getDefault().register(this);
+
     }
 
     @Override
@@ -135,7 +143,7 @@ public class Tab1 extends Fragment {
        loading = (ProgressBar)itemView.findViewById(R.id.loading);
 
 
-//        getWeatherInformation();
+
 
 
         // to be back
@@ -198,6 +206,15 @@ public class Tab1 extends Fragment {
                                 //Display panel
                                 weatherDataContainer.setVisibility(View.VISIBLE);
                                 loading.setVisibility(View.GONE);
+
+                                locationName = weatherResult.getName();
+
+                                weatherHeader.setText(new StringBuilder(weatherResult.getWeather().get(0).getMain()));
+                                weatherDescription.setText(new StringBuilder(weatherResult.getWeather().get(0).getDescription()));
+
+                                //passing locationName into MainActivity
+
+
                             }
                         }, new Consumer<Throwable>() {
                             @Override
@@ -207,6 +224,10 @@ public class Tab1 extends Fragment {
                         })
         );
     }
+
+
+
+    //putFloat("total", value).apply();
 
 
 //    private void getWeatherInformation() {
@@ -242,7 +263,6 @@ public class Tab1 extends Fragment {
 //                })
 //        );
 //    }
-
 
 }
 
