@@ -54,6 +54,7 @@ public class Tab1 extends Fragment {
     private ProgressBar loading;
     private ConstraintLayout weatherDataContainer;
     private TextView mTvLocation;
+
     //to be back
     //private MainActivityViewModel viewModel;
     //
@@ -72,6 +73,8 @@ public class Tab1 extends Fragment {
 
         return instance;
     }
+
+
 
     public Tab1(){
         compositeDisposable = new CompositeDisposable();

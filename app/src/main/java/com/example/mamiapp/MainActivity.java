@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.design.widget.Snackbar;
@@ -20,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mamiapp.Common.Common;
+import com.example.mamiapp.Database.DBClient;
+import com.example.mamiapp.Database.ProductTable;
 import com.example.mamiapp.Retrofit.IOpenWeatherMap;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -35,6 +38,7 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -47,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
+
+
+    private List<ProductTable> productList = new ArrayList<>();
 
 
     // I will need this to populate city name in correct place
@@ -137,6 +144,34 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                 ).check();
 
         init();
+
+        //DB population at start
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+                if( DBClient
+                        .getInstance(getApplicationContext())
+                        .getAppDatabase()
+                        .productDao()
+                        .getWholeList().isEmpty()) {
+
+                    for (int i = 0; i < GeoObject.PRE_DEFINED_GEO_OBJECT_NAMES.length; i++) {
+                        ProductTable productTable = new ProductTable();
+                        productTable.setGeoName(GeoObject.PRE_DEFINED_GEO_OBJECT_NAMES[i]);
+                        productTable.setGeoPrice(GeoObject.PRE_DEFINED_PRICES[i]);
+                        productTable.setGeoImageName(GeoObject.PRE_DEFINED_GEO_OBJECT_IMAGE_IDS[i]);
+                        productList.add(productTable);
+
+                    }
+
+                    DBClient.getInstance(MainActivity.this).getAppDatabase().productDao().insert(productList);
+                }
+                return null;
+            }
+        }.execute();
+
 
 
     }
