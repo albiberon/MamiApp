@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -24,6 +25,7 @@ public class ShopActivity extends AppCompatActivity {
     private RecyclerView mGeoRecyclerView;
     private List<GeoObject> mGeoObjects;
     private GestureDetector mGestureDetector;
+    private CardView cardView;
 
     private List<ProductTable> productList = new ArrayList<>();
 
@@ -34,7 +36,7 @@ public class ShopActivity extends AppCompatActivity {
 
         mGeoObjects = new ArrayList<>();
         mGeoRecyclerView = findViewById(R.id.recyclerView);
-
+        cardView = findViewById(R.id.productCell);
 
         getTasks();
 

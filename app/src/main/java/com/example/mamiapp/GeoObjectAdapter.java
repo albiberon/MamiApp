@@ -1,6 +1,7 @@
 package com.example.mamiapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,6 +25,10 @@ public class GeoObjectAdapter extends RecyclerView.Adapter<com.example.mamiapp.G
     public GeoObjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_cell, parent, false);
         return new GeoObjectViewHolder(view);
+
+
+
+
     }
 
     @Override
@@ -34,11 +39,20 @@ public class GeoObjectAdapter extends RecyclerView.Adapter<com.example.mamiapp.G
         // Populate the views with the data from the list
 
 
-
-
         holder.geoImage.setImageResource(geoObject.getmGeoImageName());
         holder.geoName.setText(geoObject.getmGeoName());
         holder.geoPrice.setText(String.valueOf(geoObject.getmGeoPrice()));
+
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ProductDetailsActivity.class);
+                intent.putExtra("productImage", listGeoObject.get(position).getmGeoImageName());
+                intent.putExtra("productName", listGeoObject.get(position).getmGeoName());
+                intent.putExtra("productPrice", listGeoObject.get(position).getmGeoPrice());
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
