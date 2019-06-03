@@ -60,8 +60,10 @@ public class Tab1 extends Fragment {
     private FragmentAListener listener;
 
     //to be back
-    //private MainActivityViewModel viewModel;
+    //private Tab1ViewModel viewModel;
     //
+
+    private Tab1ViewModel viewModel;
 
     CompositeDisposable compositeDisposable;
     IOpenWeatherMap mService;
@@ -84,30 +86,20 @@ public class Tab1 extends Fragment {
 
     public Tab1(){
         compositeDisposable = new CompositeDisposable();
-        Retrofit retrofit = new RetrofitClient().getInstance();
-        mService = retrofit.create(IOpenWeatherMap.class);
+        viewModel = ViewModelProviders.of(this).get(Tab1ViewModel.class);
+
 
 
     }
 
 
-    public void getAddress(double lat, double lng) {
-        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            Address obj = addresses.get(0);
-            String add = obj.getAddressLine(0);
-            //Log.v("IGA", "Address" + add);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     @Subscribe
     public void onEvent(DataSyncEvent syncStatusMessage) {
         if(syncStatusMessage.getSyncStatusMessage().equals("Active")){
 
-            getAddress(MainActivity.mLocation.getLatitude(),MainActivity.mLocation.getLongitude());
+            viewModel.getAddress(MainActivity.mLocation.getLatitude(),MainActivity.mLocation.getLongitude());
             getWeatherInformation();
         }
     }
@@ -157,7 +149,7 @@ public class Tab1 extends Fragment {
 
 
         // to be back
-      //  viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+      //  viewModel = ViewModelProviders.of(this).get(Tab1ViewModel.class);
       //  viewModel.getWeather();
         //
 
@@ -194,49 +186,7 @@ public class Tab1 extends Fragment {
 
     }
 
-    public void getWeatherInformation() {
-        compositeDisposable.add(mService
-                        .getWeatherByLatLng(String.valueOf(MainActivity.mLocation.getLatitude())
-                                ,String.valueOf(MainActivity.mLocation.getLongitude())
-                                , Common.APP_ID, "metric")
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Consumer<WeatherResult>() {
-                            @Override
-                            public void accept(WeatherResult weatherResult) throws Exception {
 
-                                //Load image
-                                Picasso.get().load(new StringBuilder("https://openweathermap.org/img/w/")
-                                        .append(weatherResult.getWeather().get(0).getIcon())
-                                        .append(".png").toString()).into(image_weather);
-
-                                // Loading information
-                                temperature.setText(new StringBuilder(String.valueOf(Math.round(weatherResult.getMain().getTemp())))
-//                        temperature.setText(new StringBuilder(String.valueOf(weatherResult.getMain().getTemp()))
-                                        .append("°c").toString());
-                                date.setText(Common.convertUnixToDate(weatherResult.getDt()));
-
-                                //Display panel
-                                weatherDataContainer.setVisibility(View.VISIBLE);
-                                loading.setVisibility(View.GONE);
-
-                                locationName = weatherResult.getName();
-                                Log.v("LOCATIONNAME", locationName);
-                                listener.onInputASent(locationName);
-
-                                weatherHeader.setText(new StringBuilder(weatherResult.getWeather().get(0).getMain()));
-                                weatherDescription.setText(new StringBuilder(weatherResult.getWeather().get(0).getDescription()));
-
-
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) throws Exception {
-                                Toast.makeText(getActivity(), ""+throwable.getMessage() , Toast.LENGTH_SHORT);
-                            }
-                        })
-        );
-    }
 
 
 
